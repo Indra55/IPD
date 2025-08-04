@@ -1,4 +1,4 @@
-module github.com/Omkardalvi01/IPD.git
+module github.com/Omkardalvi01/IPD
 
 go 1.24.4
 
