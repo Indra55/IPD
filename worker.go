@@ -1,9 +1,10 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"os"
 	"sync"
+	"github.com/Omkardalvi01/IPD/networking"
 )
 
 type Result struct{
@@ -22,13 +23,34 @@ type Worker struct{
 }
 
 func (w Worker) start(wg *sync.WaitGroup){
-	
-	for r := range w.req_chan {
-		fmt.Println("Sending data of file", r.f.Name())
+	peer , err := networking.Peerconnection()
+	if err != nil{
+		log.Printf("Error with peer connection in worker %d", w.worker_id)
+		return 
+	}
+
+	dc , err := create_data_channel(peer)
+	if err != nil{
+		log.Printf("Error with creating data channel in worker %d", w.worker_id)
+		return 
+	}
+	defer dc.Close()
+
+	dc.OnOpen(func() {
+		for r := range w.req_chan {
+
+		err := dc.SendText(r.f.Name())
+		if err != nil{
+			log.Print("Error sending file")
+			continue
+		}
+
 		w.res_chan <- Result{worker_id: w.worker_id, result: "Success"}
 		r.f.Close()
-	}
-	wg.Done()
+		}
+		wg.Done()
+	})
+	
 }
 
 type Workerpool struct{

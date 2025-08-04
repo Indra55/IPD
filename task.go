@@ -15,4 +15,3 @@ func create_data_channel(pc *webrtc.PeerConnection) (*webrtc.DataChannel, error)
 	
 	return dc , err
 }
-	
