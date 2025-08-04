@@ -1,0 +1,70 @@
+package main
+
+import (
+	"fmt"
+	"log"
+	"os"
+	"path/filepath"
+	"runtime"
+	"sync"
+)
+
+func get_data(dir *os.File) ([]os.DirEntry, error){
+	files , err :=	dir.ReadDir(-1)
+	if err != nil{
+		return nil , err
+	}
+	
+	return files, nil
+}
+
+func main(){
+	var wg sync.WaitGroup
+	var dir string
+	fmt.Print("Provide dir path: ")
+	fmt.Scan(&dir)
+	
+	f, err := os.Open(dir)
+	if err != nil {
+		log.Fatal("Error while opening file",err)
+	}
+	defer f.Close()
+
+	files, err :=  get_data(f)
+	if err != nil {
+		log.Fatal("Error while reading dir", err)
+	}
+
+	requeschan := make(chan Request)
+	resultchan := make(chan Result)
+	wp := Workerpool{requestchan: requeschan, resultchan: resultchan}
+	
+	numWorkers := runtime.NumCPU()
+	fmt.Println("Workers :",numWorkers)
+	wp.start_pool(numWorkers, &wg)
+
+	go func(){
+		for _ , file_entries := range files{
+		file_path := filepath.Join(dir ,file_entries.Name())
+		
+		file , err := os.Open(file_path)
+		if err != nil {
+			log.Printf("Error while reading file %s error %v\n", file_path, err)
+			continue
+		}
+
+		requeschan <- Request{f: file}
+		}
+		close(requeschan)
+	}()
+	
+	go func()  {
+		wg.Wait()
+		close(resultchan)
+	}()
+
+	for result := range resultchan{
+		fmt.Printf("worker: %v result: %s\n", result.worker_id, result.result)
+	}
+
+}
