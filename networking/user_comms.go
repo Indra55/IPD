@@ -7,13 +7,18 @@ import (
 )
 
 
-func Peerconnection() (*webrtc.PeerConnection, error) {
+func Peerconnection(uid	string) (*webrtc.PeerConnection, error) {
 
 	conn, err := Createconnection()
 	if err != nil{
 		return nil, err
 	}
 	defer conn.Close()
+
+	err = Forward(conn, uid)
+	if err != nil{
+		return nil, err
+	}
 	
 	peer_conn, err := webrtc.NewPeerConnection(Webconfig)
 	if err != nil {

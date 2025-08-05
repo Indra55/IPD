@@ -1,9 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"sync"
+
 	"github.com/Omkardalvi01/IPD/networking"
 )
 
@@ -23,7 +25,10 @@ type Worker struct{
 }
 
 func (w Worker) start(wg *sync.WaitGroup){
-	peer , err := networking.Peerconnection()
+	uid := create_uid()
+	fmt.Printf("uid for worker %d : %s\n",w.worker_id, uid)
+
+	peer , err := networking.Peerconnection(uid)
 	if err != nil{
 		log.Printf("Error with peer connection in worker %d", w.worker_id)
 		return 

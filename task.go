@@ -2,7 +2,7 @@ package main
 
 import (
 	"log"
-
+	"github.com/google/uuid"
 	"github.com/pion/webrtc/v3"
 )
 
@@ -14,4 +14,9 @@ func create_data_channel(pc *webrtc.PeerConnection) (*webrtc.DataChannel, error)
 	}
 	
 	return dc , err
+}
+
+func create_uid() (string){
+	uid := uuid.New().URN()
+	return  uid
 }

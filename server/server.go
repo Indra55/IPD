@@ -35,48 +35,43 @@ func exchangeSDP(conn *websocket.Conn){
 		Peer[conn_id] = comms_channel
 	}
 
-	_ , num_conns , err := conn.ReadMessage()
-	if err != nil{
-		fmt.Print("Error while reading id",err)
-	}	
 	
-	for i := 0 ; i < int(num_conns[0]); i++{
-		select{
-		case offer := <-comms_channel:
-			err := conn.WriteMessage(websocket.TextMessage, []byte(offer))
-			if err != nil{
-				fmt.Print("Error forwarding offer ", err)
-				return 
-			}
-			fmt.Println("Directing offer to peerB",string(offer))
-
-			_ , answer , err := conn.ReadMessage()
-			if err != nil{
-				fmt.Print("Error reading answer ", err)
-				return 
-			}
-			fmt.Println("Sending answer to peerA", string(answer))
-			comms_channel <- string(answer)
-			return
-		
-		default:
-			_ , offer, err := conn.ReadMessage()
-			if err != nil{
-				fmt.Print("Error reading offer ", err)
-				return 
-			}
-			fmt.Println("Recieved Offer ", string(offer))
-			comms_channel <- string(offer)
-
-			answer := <-comms_channel
-			err = conn.WriteMessage(websocket.TextMessage, []byte(answer)) 
-			if err != nil{
-				fmt.Print("Error at writing answer ", err)
-				return 
-			}
-			fmt.Println("Recieved answer from peerB", string(answer))
+	select{
+	case offer := <-comms_channel:
+		err := conn.WriteMessage(websocket.TextMessage, []byte(offer))
+		if err != nil{
+			fmt.Print("Error forwarding offer ", err)
+			return 
 		}
-	}	
+		fmt.Println("Directing offer to peerB",string(offer))
+
+		_ , answer , err := conn.ReadMessage()
+		if err != nil{
+			fmt.Print("Error reading answer ", err)
+			return 
+		}
+		fmt.Println("Sending answer to peerA", string(answer))
+		comms_channel <- string(answer)
+		return
+	
+	default:
+		_ , offer, err := conn.ReadMessage()
+		if err != nil{
+			fmt.Print("Error reading offer ", err)
+			return 
+		}
+		fmt.Println("Recieved Offer ", string(offer))
+		comms_channel <- string(offer)
+
+		answer := <-comms_channel
+		err = conn.WriteMessage(websocket.TextMessage, []byte(answer)) 
+		if err != nil{
+			fmt.Print("Error at writing answer ", err)
+			return 
+		}
+		fmt.Println("Recieved answer from peerB", string(answer))
+	}
+
 	
 }
 

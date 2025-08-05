@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"runtime"
 	"sync"
+
+	"github.com/google/uuid"
 )
 
 func get_data(dir *os.File) ([]os.DirEntry, error){
@@ -38,6 +40,11 @@ func main(){
 	requeschan := make(chan Request)
 	resultchan := make(chan Result)
 	wp := Workerpool{requestchan: requeschan, resultchan: resultchan}
+
+	uid := uuid.New().URN()
+	fmt.Println("Copy paste to peer:")
+	fmt.Println(uid)
+	
 	
 	numWorkers := runtime.NumCPU()
 	fmt.Println("Workers :",numWorkers)
