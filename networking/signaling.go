@@ -17,8 +17,8 @@ func Createconnection() (*websocket.Conn, error){
 	return conn, nil
 }
 
-func Forward(conn *websocket.Conn, sdp string) error{
-	err := conn.WriteMessage(websocket.TextMessage, []byte(sdp))
+func Forward(conn *websocket.Conn, msg string) error{
+	err := conn.WriteMessage(websocket.TextMessage, []byte(msg))
 	if err != nil{
 		log.Println("Error at line 20 in signaling.go")
 		return err
