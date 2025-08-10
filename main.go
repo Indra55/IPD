@@ -9,20 +9,14 @@ import (
 	"sync"
 )
 
-func get_data(dir *os.File) ([]os.DirEntry, error){
-	files , err :=	dir.ReadDir(-1)
-	if err != nil{
-		return nil , err
-	}
-	
-	return files, nil
-}
+
 
 func main(){
 	var wg sync.WaitGroup
-	var dir string
-	fmt.Print("Provide dir path: ")
-	fmt.Scan(&dir)
+	// var dir string
+	// fmt.Print("Provide dir path: ")
+	// fmt.Scan(&dir)
+	dir := "./images"
 	
 	f, err := os.Open(dir)
 	if err != nil {

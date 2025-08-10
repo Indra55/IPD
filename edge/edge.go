@@ -1,13 +1,18 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"log"
+	"os"
+
 	"github.com/Omkardalvi01/IPD/networking"
 	"github.com/pion/webrtc/v3"
 )
 
 func main(){
+
 
 	conn , err := networking.Createconnection()
 	if err != nil{
@@ -27,6 +32,8 @@ func main(){
 	if err != nil{
 		log.Fatal("Error at peer connection at line 15", err)
 	}
+	
+	var file_name string
 
 	pc.OnDataChannel(func(dc *webrtc.DataChannel) {
 		fmt.Printf("New DataChannel %s\n", dc.Label())
@@ -44,7 +51,21 @@ func main(){
 		})
 
 		dc.OnMessage(func(msg webrtc.DataChannelMessage) {
-			fmt.Printf("%s\n",string(msg.Data))
+
+			if msg.IsString{
+				file_name = string(msg.Data)
+			}else{
+				f , err:= os.Create(file_name)
+
+				if err != nil{
+					log.Fatal("Error while creating file", err)
+				}
+
+				io.Copy(f, bytes.NewBuffer(msg.Data))
+
+				f.Close()
+			}
+		
 		})
 	})
 

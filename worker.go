@@ -27,7 +27,7 @@ type Worker struct{
 func (w Worker) start(wg *sync.WaitGroup){
 	uid := create_uid()
 	fmt.Printf("uid for worker %d : %s \n",w.worker_id, uid)
-
+	var stop_worker chan struct{}
 	peer ,dc , err := networking.Peerconnection(uid)
 	if err != nil{
 		log.Printf("Error with peer connection in worker %d", w.worker_id)
@@ -40,18 +40,26 @@ func (w Worker) start(wg *sync.WaitGroup){
 		fmt.Print("Data channel Open")
 		for r := range w.req_chan {
 
-		err := dc.SendText(r.f.Name())
-		if err != nil{
-			log.Print("Error sending file")
-			continue
-		}
+			dc.SendText(r.f.Name())
 
-		w.res_chan <- Result{worker_id: w.worker_id, result: "Success"}
-		r.f.Close()
+			img , err := get_img_data(r.f.Name()) 
+			if err != nil{
+				log.Fatal("Error while get image data", err)
+			}
+
+			err = dc.Send(img)
+			if err != nil{
+				log.Fatal("Error while sending image data", err)
+			}
+
+			w.res_chan <- Result{worker_id: w.worker_id, result: "Success"}
+			r.f.Close()
 		}
 		wg.Done()
+		stop_worker <- struct{}{}
+		
 	})
-	select{}
+	<-stop_worker
 }
 
 type Workerpool struct{
