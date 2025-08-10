@@ -17,16 +17,10 @@ func main(){
 	var uid string
 	fmt.Print("Give the unique_id: ")
 	fmt.Scan(&uid)
-	node := "1"
 
 	err = networking.Forward(conn, uid)
 	if err != nil{
 		log.Fatal("Error at line 23",err)
-	}
-
-	err = networking.Forward(conn, node)
-	if err != nil{
-		log.Fatal("Error at line 28",err)
 	}
 
 	pc , err := webrtc.NewPeerConnection(networking.Webconfig)
@@ -66,9 +60,10 @@ func main(){
 
 	err = pc.SetRemoteDescription(offer_SDP)
 	if err != nil{
-		log.Fatal("Error at setting remote description")
+		log.Fatal("Error at setting remote description", err)
 	}
 
+	
 	answer , err := pc.CreateAnswer(nil)
 	if err != nil{
 		log.Fatal("Error at creating answer")
@@ -79,6 +74,7 @@ func main(){
 		log.Fatal("Error at setting local description")
 	}
 
+	fmt.Print(answer.SDP)
 	err = networking.Forward(conn, answer.SDP)
 	if err != nil{
 		log.Fatal("Error at line 63",err)

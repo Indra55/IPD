@@ -33,6 +33,8 @@ func exchangeSDP(conn *websocket.Conn){
 		fmt.Println("Creating new chat")
 		comms_channel = make(chan string)
 		Peer[conn_id] = comms_channel
+	}else{
+		fmt.Println("joined using conn_id ",conn_id)
 	}
 
 	
@@ -88,5 +90,5 @@ func wshandler(w http.ResponseWriter, r *http.Request){
 func main(){
 
 	http.HandleFunc("/", wshandler)
-	log.Fatal(http.ListenAndServe(":10000",nil))
+	log.Fatal(http.ListenAndServe(":8000",nil))
 }

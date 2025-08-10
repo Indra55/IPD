@@ -8,9 +8,9 @@ import (
 
 
 func Createconnection() (*websocket.Conn, error){
-	conn, _ , err := websocket.DefaultDialer.Dial("wss://sdp-server-poak.onrender.com/", nil)
+	conn, _ , err := websocket.DefaultDialer.Dial("ws://localhost:8000/", nil)
 	if err != nil{
-		log.Println("Error at line 11 in signaling.go")
+		log.Println("Error at line 11 in signaling.go", err)
 		return nil , err
 	}
 
@@ -31,7 +31,7 @@ func Recieve(conn *websocket.Conn) (string,error){
 
 	_ , resp , err := conn.ReadMessage()
 	if err != nil {
-		log.Println("Error at line 30 in signaling.go")
+		log.Println("Error at line 30 in signaling.go err")
 		return "",err
 	}
 	return string(resp),nil

@@ -26,22 +26,18 @@ type Worker struct{
 
 func (w Worker) start(wg *sync.WaitGroup){
 	uid := create_uid()
-	fmt.Printf("uid for worker %d : %s\n",w.worker_id, uid)
+	fmt.Printf("uid for worker %d : %s \n",w.worker_id, uid)
 
-	peer , err := networking.Peerconnection(uid)
+	peer ,dc , err := networking.Peerconnection(uid)
 	if err != nil{
 		log.Printf("Error with peer connection in worker %d", w.worker_id)
 		return 
 	}
-
-	dc , err := create_data_channel(peer)
-	if err != nil{
-		log.Printf("Error with creating data channel in worker %d", w.worker_id)
-		return 
-	}
 	defer dc.Close()
+	defer peer.Close()
 
 	dc.OnOpen(func() {
+		fmt.Print("Data channel Open")
 		for r := range w.req_chan {
 
 		err := dc.SendText(r.f.Name())
@@ -55,7 +51,7 @@ func (w Worker) start(wg *sync.WaitGroup){
 		}
 		wg.Done()
 	})
-	
+	select{}
 }
 
 type Workerpool struct{
