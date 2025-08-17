@@ -6,13 +6,11 @@ import (
 	"io"
 	"log"
 	"os"
-
 	"github.com/Omkardalvi01/IPD/networking"
 	"github.com/pion/webrtc/v3"
 )
 
 func main(){
-
 
 	conn , err := networking.Createconnection()
 	if err != nil{

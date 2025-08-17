@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"sync"
+
 	"github.com/gorilla/websocket"
 )
 
@@ -15,7 +17,12 @@ var upgrader = websocket.Upgrader{
     },
 }
 
-var Peer = make(map[string]chan string)
+type comms_channel struct{
+	id_channel map[string] chan string
+	mu sync.Mutex
+}
+
+var Peer = comms_channel{id_channel: make(map[string] chan string)}
 
 func exchangeSDP(conn *websocket.Conn){
 	defer conn.Close()
@@ -27,12 +34,14 @@ func exchangeSDP(conn *websocket.Conn){
 
 	conn_id := string(id)
 	fmt.Println("id: ",conn_id) 
-	comms_channel := Peer[conn_id]
+	comms_channel := Peer.id_channel[conn_id]
 	
 	if comms_channel == nil{
 		fmt.Println("Creating new chat")
 		comms_channel = make(chan string)
-		Peer[conn_id] = comms_channel
+		Peer.mu.Lock()
+		Peer.id_channel[conn_id] = comms_channel
+		Peer.mu.Unlock()
 	}else{
 		fmt.Println("joined using conn_id ",conn_id)
 	}
