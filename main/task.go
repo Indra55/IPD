@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"io"
 	"log"
+	"math/rand/v2"
 	"os"
-
-	"github.com/google/uuid"
+	"strconv"
 )
 
 func get_data(dir *os.File) ([]os.DirEntry, error){
@@ -37,6 +37,7 @@ func get_img_data(file_path string) ([]byte , error){
 }
 
 func create_uid() (string){
-	uid := uuid.New().URN()
-	return  uid
+	uid := rand.IntN(9999)
+	uid_str := strconv.Itoa(uid)
+	return  uid_str
 }

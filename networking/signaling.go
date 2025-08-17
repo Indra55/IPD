@@ -8,7 +8,7 @@ import (
 
 
 func Createconnection() (*websocket.Conn, error){
-	conn, _ , err := websocket.DefaultDialer.Dial("ws://localhost:8000/", nil)
+	conn, _ , err := websocket.DefaultDialer.Dial("wss://sdp-server-poak.onrender.com", nil)
 	if err != nil{
 		log.Println("Error at line 11 in signaling.go", err)
 		return nil , err
