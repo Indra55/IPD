@@ -1,3 +1,2 @@
-/example_dir
-/main/images
-/edge/images
+edge/*/
+main/*/
