@@ -6,9 +6,11 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+var TESTING_LINK = "ws://localhost:8000/" 
+var REAL_LINK = "wss://sdp-server-poak.onrender.com"
 
 func Createconnection() (*websocket.Conn, error){
-	conn, _ , err := websocket.DefaultDialer.Dial("wss://sdp-server-poak.onrender.com", nil)
+	conn, _ , err := websocket.DefaultDialer.Dial(TESTING_LINK, nil)
 	if err != nil{
 		log.Println("Error at line 11 in signaling.go", err)
 		return nil , err

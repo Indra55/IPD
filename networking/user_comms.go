@@ -6,7 +6,9 @@ import (
 
 	"github.com/pion/webrtc/v3"
 )
-
+const(
+	Role string = "W"
+)
 
 func Peerconnection(uid	string) (*webrtc.PeerConnection, *webrtc.DataChannel, error) {
 
@@ -15,6 +17,11 @@ func Peerconnection(uid	string) (*webrtc.PeerConnection, *webrtc.DataChannel, er
 		return nil, nil, err
 	}
 	defer conn.Close()
+
+	err = Forward(conn, Role)
+	if err != nil{
+		return nil, nil,  err
+	}
 
 	err = Forward(conn, uid)
 	if err != nil{

@@ -24,7 +24,7 @@ func main(){
 	}
 	defer f.Close()
 
-	files, err :=  get_data(f)
+	n, files, err :=  get_data(f)
 	if err != nil {
 		log.Fatal("Error while reading dir", err)
 	}
@@ -35,7 +35,11 @@ func main(){
 	
 	numWorkers := runtime.NumCPU()
 	fmt.Println("Workers :",numWorkers)
-	wp.start_pool(numWorkers, &wg)
+
+	uid := create_uid()
+	fmt.Println("Connection_id:",uid)
+	
+	wp.start_pool(numWorkers, uid, &wg)
 
 	go func(){
 		for _ , file_entries := range files{
@@ -56,9 +60,14 @@ func main(){
 		wg.Wait()
 		close(resultchan)
 	}()
-
+	
+	i := 1
 	for result := range resultchan{
-		fmt.Printf("worker: %v result: %s\n", result.worker_id, result.result)
+		if result.result == SUCCESS{
+			fmt.Printf("worker: %d uploaded: %d/%d\n", result.worker_id, i, n )
+			i++
+		}
+		
 	}
 
 }

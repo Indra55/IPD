@@ -9,13 +9,13 @@ import (
 	"strconv"
 )
 
-func get_data(dir *os.File) ([]os.DirEntry, error){
+func get_data(dir *os.File) (int, []os.DirEntry, error){
 	files , err :=	dir.ReadDir(-1)
 	if err != nil{
-		return nil , err
+		return 0, nil , err
 	}
-
-	return files, nil
+	n := len(files)
+	return n, files, nil
 }
 
 func get_img_data(file_path string) ([]byte , error){

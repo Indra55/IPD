@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 	"sync"
-
 	"github.com/Omkardalvi01/IPD/networking"
 )
 
 type Result struct{
 	worker_id int
-	result string
+	result result_state
 }
 
 type Request struct{
@@ -20,15 +20,22 @@ type Request struct{
 
 type Worker struct{
 	req_chan <-chan Request
-	worker_id int
 	res_chan chan<- Result
+	worker_id int
+	conn_id string
 }
 
+type result_state int
+const(
+	SUCCESS result_state = 0
+	FAILURE result_state = -1 
+)
+
 func (w Worker) start(wg *sync.WaitGroup){
-	uid := create_uid()
-	fmt.Printf("uid for worker %d : %s \n",w.worker_id, uid)
+	// uid := create_uid()
+	// fmt.Printf("uid for worker %d : %s \n",w.worker_id, uid)
 	var stop_worker chan struct{}
-	peer ,dc , err := networking.Peerconnection(uid)
+	peer ,dc , err := networking.Peerconnection(w.conn_id)
 	if err != nil{
 		log.Printf("Error with peer connection in worker %d", w.worker_id)
 		return 
@@ -40,7 +47,8 @@ func (w Worker) start(wg *sync.WaitGroup){
 		fmt.Print("Data channel Open")
 		for r := range w.req_chan {
 
-			dc.SendText(r.f.Name())
+			file_name := strings.Split(r.f.Name(), "/")[1]
+			dc.SendText(file_name)
 
 			img , err := get_img_data(r.f.Name()) 
 			if err != nil{
@@ -52,7 +60,7 @@ func (w Worker) start(wg *sync.WaitGroup){
 				log.Fatal("Error while sending image data", err)
 			}
 
-			w.res_chan <- Result{worker_id: w.worker_id, result: "Success"}
+			w.res_chan <- Result{worker_id: w.worker_id, result: SUCCESS}
 			r.f.Close()
 		}
 		wg.Done()
@@ -68,10 +76,10 @@ type Workerpool struct{
 	resultchan chan<- Result
 }
 
-func (wp *Workerpool) start_pool(n int, wg *sync.WaitGroup){
+func (wp *Workerpool) start_pool(n int, id string, wg *sync.WaitGroup){
 	wp.num_workers = n
 	for i := 0 ; i < n ; i++ {
-		w := Worker{worker_id: i, req_chan: wp.requestchan, res_chan: wp.resultchan}
+		w := Worker{worker_id: i, req_chan: wp.requestchan, res_chan: wp.resultchan, conn_id: id}
 		go w.start(wg)
 		wg.Add(1)
 	}
