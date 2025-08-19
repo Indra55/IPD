@@ -112,8 +112,12 @@ func main(){
 		log.Fatal("Error at setting local description")
 	}
 
-	fmt.Print(answer.SDP)
-	err = networking.Forward(conn, answer.SDP)
+	<-webrtc.GatheringCompletePromise(pc)
+
+    finalAnswer := pc.LocalDescription()
+
+    fmt.Print(finalAnswer.SDP)
+	err = networking.Forward(conn, finalAnswer.SDP)
 	if err != nil{
 		log.Fatal("Error while forwarding answer",err)
 	}

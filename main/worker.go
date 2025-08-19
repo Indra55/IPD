@@ -44,7 +44,7 @@ func (w Worker) start(wg *sync.WaitGroup){
 	defer peer.Close()
 
 	dc.OnOpen(func() {
-		fmt.Print("Data channel Open")
+		fmt.Println("Data channel Open")
 		for r := range w.req_chan {
 
 			file_name := strings.Split(r.f.Name(), "/")[1]
