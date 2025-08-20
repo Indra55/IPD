@@ -59,6 +59,7 @@ func exchangeSDP(conn *websocket.Conn){
 		n := len(Peer.id_channel[conn_id]) 
 		if n == 0{
 			log.Println("No worker remaining")
+			Peer.mu.Unlock()
 			return
 		}
 		comms_chl = Peer.id_channel[conn_id][n-1]

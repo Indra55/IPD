@@ -13,6 +13,7 @@ import (
 
 const(
 	Role string = "E"
+	END string = "EOF"
 )
 
 func main(){
@@ -50,7 +51,7 @@ func main(){
 	}
 	
 	var file_name string
-
+	var f *os.File
 	pc.OnDataChannel(func(dc *webrtc.DataChannel) {
 		fmt.Printf("New DataChannel %s\n", dc.Label())
 
@@ -69,18 +70,23 @@ func main(){
 		dc.OnMessage(func(msg webrtc.DataChannelMessage) {
 
 			if msg.IsString{
-				file_name = string(msg.Data)
-			}else{
-				file_path := filepath.Join(dir_name,file_name)
-				f , err:= os.Create(file_path)
-
-				if err != nil{
-					log.Fatal("Error while creating file", err)
+				
+				if string(msg.Data) == END{
+					f.Close()
+				}else{
+					file_name = string(msg.Data)
+					file_path := filepath.Join(dir_name,file_name)
+					f , err= os.Create(file_path)
+					if err != nil{
+						log.Fatal("Error while creating file", err)
+					}
 				}
-
-				io.Copy(f, bytes.NewBuffer(msg.Data))
-
-				f.Close()
+				
+			}else{
+				_ , err = io.Copy(f, bytes.NewBuffer(msg.Data))
+				if err != nil{
+					log.Fatal("Error while copying file", err)
+				}
 			}
 		
 		})

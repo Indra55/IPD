@@ -43,15 +43,15 @@ func main(){
 
 	go func(){
 		for _ , file_entries := range files{
-		file_path := filepath.Join(dir ,file_entries.Name())
-		
-		file , err := os.Open(file_path)
-		if err != nil {
-			log.Printf("Error while reading file %s error %v\n", file_path, err)
-			continue
-		}
+			file_path := filepath.Join(dir ,file_entries.Name())
+			
+			file , err := os.Open(file_path)
+			if err != nil {
+				log.Printf("Error while reading file %s error %v\n", file_path, err)
+				continue
+			}
 
-		requeschan <- Request{f: file}
+			requeschan <- Request{f: file}
 		}
 		close(requeschan)
 	}()

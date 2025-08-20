@@ -9,6 +9,13 @@ import (
 	"github.com/Omkardalvi01/IPD/networking"
 )
 
+type result_state int
+const(
+	SUCCESS result_state = 0
+	FAILURE result_state = -1 
+	END string = "EOF"
+)
+
 type Result struct{
 	worker_id int
 	result result_state
@@ -24,12 +31,6 @@ type Worker struct{
 	worker_id int
 	conn_id string
 }
-
-type result_state int
-const(
-	SUCCESS result_state = 0
-	FAILURE result_state = -1 
-)
 
 func (w Worker) start(wg *sync.WaitGroup){
 	// uid := create_uid()
@@ -59,9 +60,12 @@ func (w Worker) start(wg *sync.WaitGroup){
 			if err != nil{
 				log.Fatal("Error while sending image data", err)
 			}
+			
+			dc.SendText(END)
 
 			w.res_chan <- Result{worker_id: w.worker_id, result: SUCCESS}
 			r.f.Close()
+			
 		}
 		wg.Done()
 		stop_worker <- struct{}{}
@@ -80,8 +84,8 @@ func (wp *Workerpool) start_pool(n int, id string, wg *sync.WaitGroup){
 	wp.num_workers = n
 	for i := 0 ; i < n ; i++ {
 		w := Worker{worker_id: i, req_chan: wp.requestchan, res_chan: wp.resultchan, conn_id: id}
-		go w.start(wg)
 		wg.Add(1)
+		go w.start(wg)
 	}
 }
 
