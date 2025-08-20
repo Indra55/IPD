@@ -42,7 +42,14 @@ func main(){
 	wp.start_pool(numWorkers, uid, &wg)
 
 	go func(){
-		for _ , file_entries := range files{
+		i := 1
+		for result := range resultchan{
+			fmt.Printf("worker: %d status: %v uploaded: %d/%d\n", result.worker_id, result.result, i, n )
+			i++
+		}
+	}()
+	
+	for _ , file_entries := range files{
 			file_path := filepath.Join(dir ,file_entries.Name())
 			
 			file , err := os.Open(file_path)
@@ -50,24 +57,12 @@ func main(){
 				log.Printf("Error while reading file %s error %v\n", file_path, err)
 				continue
 			}
-
+			wg.Add(1)
 			requeschan <- Request{f: file}
 		}
-		close(requeschan)
-	}()
-	
-	go func()  {
-		wg.Wait()
-		close(resultchan)
-	}()
-	
-	i := 1
-	for result := range resultchan{
-		if result.result == SUCCESS{
-			fmt.Printf("worker: %d uploaded: %d/%d\n", result.worker_id, i, n )
-			i++
-		}
-		
-	}
+	close(requeschan)
+
+	wg.Wait()
+	close(resultchan)
 
 }
